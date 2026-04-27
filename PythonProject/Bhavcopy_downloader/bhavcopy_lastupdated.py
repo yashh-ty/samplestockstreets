@@ -11,3 +11,8 @@ print('last_date+record is ',records[1])
 last_date_record=records[1]+datetime.timedelta(days=1)
 print(records)
 cursor.close()
+if __name__ == "__main__":
+    print(records)
+    print('last_date record is ', records[1])
+
+
