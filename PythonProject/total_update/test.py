@@ -6,10 +6,13 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
+import os
+
+
 def column_exists(table_name, column_name):
     query = """
-    SELECT COUNT(*) 
-    FROM INFORMATION_SCHEMA.COLUMNS 
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.COLUMNS
     WHERE TABLE_SCHEMA = 'stock_streets'
     AND TABLE_NAME = %s
     AND COLUMN_NAME = %s
@@ -29,8 +32,8 @@ def report(table_name):
         last_update_query = "NULL"
 
     value=d[table_name]
-    selectData= f'''SELECT 
-        '{table_name}' AS Table_Name, 
+    selectData= f'''SELECT
+        '{table_name}' AS Table_Name,
         COUNT(*) AS Total_rows,
         MIN({value}) AS START_DATE,
         MAX({value}) AS END_DATE,
@@ -58,7 +61,8 @@ bulk=report('bulk_deal')
 block=report('block_deal')
 derivative=report('derivative_bhavcopy')
 pe=report('pe')
-fii=report('index_api_data')
+fiiderivatives=report('fii_derivatives_stats')
+fiidii=report('fii_dii')
 index_api_data=report('index_api_data')
 mutual_fund_nav=report('mutual_fund_nav')
 
@@ -66,43 +70,81 @@ mutual_fund_nav=report('mutual_fund_nav')
 
 #CREATION OF PDF AND SAVING THE PDF  IN LOCAL SYSTEM
 
-rows=bhavcopy+bulk+block+derivative+pe+fii+mutual_fund_nav
-total=[]
-for i,j in enumerate(rows,start=1):
-    total.append([i]+j)
+def pdf_creation():
+    rows=bhavcopy+bulk+block+derivative+pe+fiiderivatives+mutual_fund_nav
+    total=[]
+    for i,j in enumerate(rows,start=1):
+        total.append([i]+j)
 
 
 
-headers=["SRNO","TABLENAME","TOTALROWS","START_DATE","END_DATE","LAST_UPDATE","REPORT_DATE","LOCALORVPS"]
-data = [headers] + total
-f =datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-file_path=fr"D:\report_{f}.pdf"
-doc = SimpleDocTemplate(file_path,
-    pagesize=landscape(letter),
-    leftMargin=20,
-    rightMargin=20,
-    topMargin=20,
-    bottomMargin=20)
-
-styles = getSampleStyleSheet()
-
-date_title=datetime.datetime.now().strftime("%d-%m-%Y")
-title = Paragraph(f"Daily Database Report-{date_title}", styles['Title'])
 
 
-table = Table(data,colWidths=[40, 120, 80, 80, 80, 120, 100, 80])
+    headers=["SRNO","TABLENAME","TOTALROWS","START_DATE","END_DATE","LAST_UPDATE","REPORT_DATE","LOCALORVPS"]
+    data = [headers] + total
+    f =datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    file_path=fr"D:\report_{f}.pdf"
+    doc = SimpleDocTemplate(file_path,
+        pagesize=landscape(letter),
+        leftMargin=20,
+        rightMargin=20,
+        topMargin=20,
+        bottomMargin=20)
 
-table.setStyle([
-    ('GRID', (0,0), (-1,-1), 1, colors.black),
-    ('BACKGROUND', (0,0), (-1,0), colors.grey),
-    ('TEXTCOLOR', (0,0), (-1,0), colors.white),
-])
-elements = []
-elements.append(title)
-elements.append(Spacer(1, 20))  # space after title
-elements.append(table)
-doc.build(elements)
+    styles = getSampleStyleSheet()
 
+    date_title=datetime.datetime.now().strftime("%d-%m-%Y")
+    title = Paragraph(f"Daily Database Report-{date_title}", styles['Title'])
+
+
+    table = Table(data,colWidths=[40, 120, 80, 80, 80, 120, 100, 80])
+
+    table.setStyle([
+        ('GRID', (0,0), (-1,-1), 1, colors.black),
+        ('BACKGROUND', (0,0), (-1,0), colors.grey),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+    ])
+    elements = []
+    elements.append(title)
+    elements.append(Spacer(1, 20))  # space after title
+    elements.append(table)
+    doc.build(elements)
+    return file_path
+
+
+import smtplib
+from email.message import EmailMessage
+
+def send_email_with_attachment(file_path):
+    # sender_email = os.getenv("EMAIL_SECONDARY")
+    # app_password = os.getenv("APP_PASSWORD_SECONDARY")
+    sender_email="s422yashrajshilwant@gmail.com"
+    app_password="rcyx jqxr dxtv wota"
+    receiver_email = "yashrajshilwant@gmail.com"
+
+    msg = EmailMessage()
+    msg['Subject'] = "Daily DB Report"
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+
+    msg.set_content("THIS IS YOUR DAILY REPORT ")
+
+    # Attach PDF
+    with open(file_path, 'rb') as f:
+        file_data = f.read()
+        file_name = os.path.basename(file_path)
+
+    msg.add_attachment(file_data, maintype='application', subtype='pdf', filename=file_name)
+
+    # Send email
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+        smtp.login(sender_email, app_password)
+        smtp.send_message(msg)
+
+    print("Email sent successfully!")
+
+file_path=pdf_creation()
+send_email_with_attachment(file_path)
 
 
 
