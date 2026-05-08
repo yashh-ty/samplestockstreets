@@ -118,7 +118,7 @@ def run_pipeline(from_date, to_date, batch_size=500):
             current += timedelta(days=1)
             continue
 
-        print(f"📅 Processing {current}")
+        # print(f"📅 Processing {current}")
 
         df = download_index_bhavcopy(session, current)
 
@@ -151,7 +151,7 @@ def run_pipeline(from_date, to_date, batch_size=500):
         if len(batch) >= batch_size:
             insert_batch(cursor, batch)
             mydb.commit()
-            print(f"✅ Inserted batch of {len(batch)}")
+            # print(f"✅ Inserted batch of {len(batch)}")
             batch.clear()
 
         current += timedelta(days=1)
@@ -160,11 +160,10 @@ def run_pipeline(from_date, to_date, batch_size=500):
     if batch:
         insert_batch(cursor, batch)
         mydb.commit()
-        print(f"✅ Final batch inserted: {len(batch)}")
+        # print(f"✅ Final batch inserted: {len(batch)}")
 
-    # cursor.close()
 
-    print("🎉 Data sync complete!")
+    # print("🎉 Data sync complete!")
 
 
 start_date_input = last_date_record

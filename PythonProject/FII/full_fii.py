@@ -90,6 +90,6 @@ def run_fii_pipeline():
 
 
 run_fii_pipeline()
-cursor.close()
-mydb.close()
+# cursor.close()
+# mydb.close()
 print("\n🚀 FII Pipeline Complete!")

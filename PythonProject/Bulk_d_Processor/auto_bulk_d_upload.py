@@ -4,7 +4,7 @@ from datetime import datetime,date
 from io import StringIO
 from SQL.Connectingmysql import cursor,mydb
 from Bulk_d_Processor.bulk_d_lastupdated import last_date_record
-from tabulate import tabulate
+
 
 
 start_date= last_date_record
@@ -101,7 +101,7 @@ def parse_bulk_data(csv_text):
             ))
 
         except Exception as e:
-            print("⚠️ Skipping row:", row, e)
+            # print("⚠️ Skipping row:", row, e)
             continue
 
     return data_to_insert
@@ -135,7 +135,7 @@ def insert_bulk_data(data):
         mydb.commit()
         total += len(batch)
 
-    print("Inserted rows:", total)
+    # print("Inserted rows:", total)
     return total
 
 
@@ -150,9 +150,10 @@ try:
 
         if parsed_data:
             total_rows = insert_bulk_data(parsed_data)
-            print(f"\n🎯 Total rows inserted: {total_rows}")
+            # print(f"\n🎯 Total rows inserted: {total_rows}")
         else:
-            print("⚠️ No data to insert")
+            # print("⚠️ No data to insert")
+           pass
 
 except Exception as e:
     print("❌ Unexpected Error:", e)

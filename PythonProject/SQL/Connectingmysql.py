@@ -7,5 +7,6 @@ mydb = pymysql.connect(
     port=3306,
     autocommit=False
 )
+
 cursor = mydb.cursor()
-print("✅ DB Connected")
+# print("✅ DB Connected")

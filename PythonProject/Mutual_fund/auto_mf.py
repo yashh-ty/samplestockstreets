@@ -143,6 +143,6 @@ def run_pipeline():
         current_date += timedelta(days=1)
 
 
-    print("🎯 BULK DOWNLOAD COMPLETE!")
+    print("🎯 MUTUAL FUND DOWNLOAD COMPLETE!")
 
 run_pipeline()
